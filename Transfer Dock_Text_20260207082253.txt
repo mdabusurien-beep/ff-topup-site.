@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FF Top Up Pro</title>
+
+<style>
+body{background:#111;color:white;font-family:sans-serif;text-align:center;}
+.box{background:#222;padding:20px;margin:20px;border-radius:10px;}
+input,select{width:90%;padding:10px;margin:10px;border:none;border-radius:5px;}
+button{padding:10px 20px;background:red;color:white;border:none;border-radius:5px;}
+.order{background:#333;padding:10px;margin:10px;border-radius:5px;}
+</style>
+
+</head>
+<body>
+
+<h2>🔥 Free Fire Diamond Top Up 🔥</h2>
+
+<div class="box">
+<input type="text" id="uid" placeholder="Enter UID">
+<select id="package">
+<option value="">Select Package</option>
+<option>100 Diamond - 90৳</option>
+<option>310 Diamond - 250৳</option>
+<option>520 Diamond - 400৳</option>
+</select>
+<input type="text" id="number" placeholder="Bkash/Nagad Number">
+<button onclick="placeOrder()">Submit Order</button>
+<button onclick="adminLogin()">Admin</button>
+</div>
+
+<div id="adminPanel" style="display:none;">
+<div class="box">
+<input type="password" id="adminPass" placeholder="Admin Password">
+<button onclick="login()">Login</button>
+</div>
+
+<div id="ordersSection" style="display:none;">
+<h3>Orders</h3>
+<div id="ordersList"></div>
+</div>
+</div>
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+<script>
+
+// 🔥 এখানে তোমার Firebase Config বসাবে
+var firebaseConfig = {
+apiKey: "YOUR_API_KEY",
+authDomain: "YOUR_AUTH_DOMAIN",
+databaseURL: "YOUR_DATABASE_URL",
+projectId: "YOUR_PROJECT_ID",
+storageBucket: "YOUR_STORAGE_BUCKET",
+messagingSenderId: "YOUR_MSG_ID",
+appId: "YOUR_APP_ID"
+};
+
+firebase.initializeApp(firebaseConfig);
+var database = firebase.database();
+
+var adminPassword = "12345"; // change this
+
+function placeOrder(){
+var uid = document.getElementById("uid").value;
+var pack = document.getElementById("package").value;
+var number = document.getElementById("number").value;
+
+if(uid==""||pack==""||number==""){
+alert("Fill all fields");
+return;
+}
+
+database.ref("orders").push({
+uid:uid,
+pack:pack,
+number:number
+});
+
+alert("Order Submitted!");
+}
+
+function adminLogin(){
+document.getElementById("adminPanel").style.display="block";
+}
+
+function login(){
+var pass = document.getElementById("adminPass").value;
+if(pass==adminPassword){
+document.getElementById("ordersSection").style.display="block";
+loadOrders();
+}else{
+alert("Wrong Password");
+}
+}
+
+function loadOrders(){
+database.ref("orders").on("value",function(snapshot){
+var list=document.getElementById("ordersList");
+list.innerHTML="";
+snapshot.forEach(function(child){
+var data=child.val();
+var key=child.key;
+list.innerHTML+=`
+<div class="order">
+UID: ${data.uid}<br>
+Package: ${data.pack}<br>
+Number: ${data.number}<br>
+<button onclick="deleteOrder('${key}')">Delete</button>
+</div>`;
+});
+});
+}
+
+function deleteOrder(key){
+database.ref("orders/"+key).remove();
+}
+
+</script>
+
+</body>
+</html>
